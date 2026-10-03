@@ -1,8 +1,16 @@
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 const sharp = require('sharp');
 const Photo = require('../models/Photo');
 const Category = require('../models/Category');
+const Series = require('../models/Series');
 const { saveFile, deleteFile } = require('../config/storage');
+
+// '' / null / unknown id → no series
+async function resolveSeries(id) {
+  if (!id || !mongoose.isValidObjectId(id)) return null;
+  return (await Series.exists({ _id: id })) ? id : null;
+}
 
 async function listPhotos(req, res) {
   const filter = {};
@@ -21,7 +29,7 @@ async function listPhotos(req, res) {
 
 async function createPhoto(req, res) {
   if (!req.file) return res.status(400).json({ message: 'Image file is required' });
-  const { title, description = '', category: categoryId, featured } = req.body || {};
+  const { title, description = '', category: categoryId, featured, series } = req.body || {};
   if (!title || !title.trim()) return res.status(400).json({ message: 'Title is required' });
 
   const category = await Category.findById(categoryId);
@@ -68,6 +76,7 @@ async function createPhoto(req, res) {
     width: fullMeta.width,
     height: fullMeta.height,
     featured: featured === 'true' || featured === true,
+    series: await resolveSeries(series),
   });
   await photo.populate('category', 'name slug');
   res.status(201).json(photo);
@@ -77,11 +86,13 @@ async function updatePhoto(req, res) {
   const photo = await Photo.findById(req.params.id);
   if (!photo) return res.status(404).json({ message: 'Photo not found' });
 
-  const { title, description, category: categoryId, featured, hero, order } = req.body || {};
+  const { title, description, category: categoryId, featured, hero, order, series } =
+    req.body || {};
   if (title !== undefined) photo.title = title.trim();
   if (description !== undefined) photo.description = description.trim();
   if (featured !== undefined) photo.featured = featured === true || featured === 'true';
   if (order !== undefined) photo.order = order;
+  if (series !== undefined) photo.series = await resolveSeries(series);
   if (hero !== undefined) {
     photo.hero = hero === true || hero === 'true';
     if (photo.hero) await Photo.updateMany({ _id: { $ne: photo._id } }, { hero: false });

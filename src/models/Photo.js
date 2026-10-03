@@ -5,6 +5,7 @@ const photoSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, default: '', trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+    series: { type: mongoose.Schema.Types.ObjectId, ref: 'Series', default: null, index: true },
     imageUrl: { type: String, required: true },
     thumbUrl: { type: String, required: true },
     blurDataUrl: { type: String, default: '' },

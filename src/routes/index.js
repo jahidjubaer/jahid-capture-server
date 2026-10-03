@@ -16,6 +16,13 @@ const {
   reorderPhotos,
   deletePhoto,
 } = require('../controllers/photoController');
+const {
+  listSeries,
+  getSeries,
+  createSeries,
+  updateSeries,
+  deleteSeries,
+} = require('../controllers/seriesController');
 const { getStats } = require('../controllers/statsController');
 const { getSettings, updateSettings } = require('../controllers/settingsController');
 
@@ -47,6 +54,13 @@ router.post('/photos', requireAdmin, upload.single('image'), createPhoto);
 router.put('/photos/reorder', requireAdmin, reorderPhotos); // must precede /photos/:id
 router.put('/photos/:id', requireAdmin, updatePhoto);
 router.delete('/photos/:id', requireAdmin, deletePhoto);
+
+// series
+router.get('/series', listSeries);
+router.get('/series/:slug', getSeries);
+router.post('/series', requireAdmin, createSeries);
+router.put('/series/:id', requireAdmin, updateSeries);
+router.delete('/series/:id', requireAdmin, deleteSeries);
 
 // stats
 router.get('/stats', requireAdmin, getStats);
