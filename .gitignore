@@ -4,3 +4,6 @@ node_modules/
 uploads/
 *.log
 .vercel
+
+.vercel
+.env*
