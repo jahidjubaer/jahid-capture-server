@@ -8,6 +8,8 @@ const photoSchema = new mongoose.Schema(
     series: { type: mongoose.Schema.Types.ObjectId, ref: 'Series', default: null, index: true },
     imageUrl: { type: String, required: true },
     thumbUrl: { type: String, required: true },
+    // 1080×1920 portrait crop for phone screens (hero); empty for very old uploads
+    mobileUrl: { type: String, default: '' },
     blurDataUrl: { type: String, default: '' },
     width: { type: Number, required: true },
     height: { type: Number, required: true },

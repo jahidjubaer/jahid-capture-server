@@ -5,6 +5,7 @@ const Photo = require('../models/Photo');
 const Category = require('../models/Category');
 const Series = require('../models/Series');
 const { saveFile, deleteFile } = require('../config/storage');
+const mobileCrop = require('../utils/mobileCrop');
 
 // '' / null / unknown id → no series
 async function resolveSeries(id) {
@@ -38,6 +39,7 @@ async function createPhoto(req, res) {
   const id = crypto.randomBytes(8).toString('hex');
   const fullName = `${id}.webp`;
   const thumbName = `${id}_thumb.webp`;
+  const mobileName = `${id}_mobile.webp`;
 
   const image = sharp(req.file.buffer).rotate(); // respect EXIF orientation
   const fullBuffer = await image
@@ -61,9 +63,12 @@ async function createPhoto(req, res) {
     .toBuffer();
   const blurDataUrl = `data:image/webp;base64,${blurBuffer.toString('base64')}`;
 
-  const [imageUrl, thumbUrl] = await Promise.all([
+  const mobileBuffer = await mobileCrop(req.file.buffer);
+
+  const [imageUrl, thumbUrl, mobileUrl] = await Promise.all([
     saveFile(`full/${fullName}`, fullBuffer),
     saveFile(`thumbs/${thumbName}`, thumbBuffer),
+    saveFile(`mobile/${mobileName}`, mobileBuffer),
   ]);
 
   const photo = await Photo.create({
@@ -72,6 +77,7 @@ async function createPhoto(req, res) {
     category: category._id,
     imageUrl,
     thumbUrl,
+    mobileUrl,
     blurDataUrl,
     width: fullMeta.width,
     height: fullMeta.height,
@@ -124,7 +130,11 @@ async function deletePhoto(req, res) {
   const photo = await Photo.findById(req.params.id);
   if (!photo) return res.status(404).json({ message: 'Photo not found' });
 
-  await Promise.all([deleteFile(photo.imageUrl), deleteFile(photo.thumbUrl)]);
+  await Promise.all([
+    deleteFile(photo.imageUrl),
+    deleteFile(photo.thumbUrl),
+    deleteFile(photo.mobileUrl),
+  ]);
   await photo.deleteOne();
   res.json({ message: 'Photo deleted' });
 }

@@ -14,6 +14,7 @@ async function saveFile(key, buffer, contentType = 'image/webp') {
       access: 'public',
       contentType,
       addRandomSuffix: false,
+      allowOverwrite: true, // keys are random ids; lets backfills regenerate a file
       cacheControlMaxAge: 60 * 60 * 24 * 365,
     });
     return blob.url;
