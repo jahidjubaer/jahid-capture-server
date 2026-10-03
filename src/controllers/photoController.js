@@ -77,11 +77,15 @@ async function updatePhoto(req, res) {
   const photo = await Photo.findById(req.params.id);
   if (!photo) return res.status(404).json({ message: 'Photo not found' });
 
-  const { title, description, category: categoryId, featured, order } = req.body || {};
+  const { title, description, category: categoryId, featured, hero, order } = req.body || {};
   if (title !== undefined) photo.title = title.trim();
   if (description !== undefined) photo.description = description.trim();
   if (featured !== undefined) photo.featured = featured === true || featured === 'true';
   if (order !== undefined) photo.order = order;
+  if (hero !== undefined) {
+    photo.hero = hero === true || hero === 'true';
+    if (photo.hero) await Photo.updateMany({ _id: { $ne: photo._id } }, { hero: false });
+  }
   if (categoryId !== undefined) {
     const category = await Category.findById(categoryId);
     if (!category) return res.status(400).json({ message: 'Valid category is required' });

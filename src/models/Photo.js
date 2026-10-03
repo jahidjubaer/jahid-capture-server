@@ -11,6 +11,8 @@ const photoSchema = new mongoose.Schema(
     width: { type: Number, required: true },
     height: { type: Number, required: true },
     featured: { type: Boolean, default: false },
+    // the homepage hero image — at most one photo has this set
+    hero: { type: Boolean, default: false },
     order: { type: Number, default: 0 },
   },
   { timestamps: true }
