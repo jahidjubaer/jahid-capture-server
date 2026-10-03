@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: ['.env', '.env.local'], quiet: true }); // .env.local: Blob token from `vercel env pull`
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
